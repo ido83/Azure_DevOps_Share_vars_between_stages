@@ -1,0 +1,72 @@
+# AN EXAMPLE FOR SHARING VARIABLES BETWEEN STAGES AND JOBS
+trigger:
+- none
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+# STAGE A
+- stage: STAGE_A
+  jobs:
+  - job: JOB_A
+    steps:
+    - script: |
+        echo "This is  JOB_A in STAGE_A."
+        echo "##vso[task.setvariable variable=sharedVar;isOutput=true]Yes"
+      name: StageAvar
+    - script: "echo StageAvar.sharedVar: $(StageAvar.sharedVar)"
+      
+  - job: JOB_A_2
+    dependsOn: JOB_A
+    condition: eq(dependencies.JOB_A.outputs['StageAvar.sharedVar'], 'Yes')
+    steps:
+    - script: |
+        echo "This is JOB_A_2."
+
+#STAGE B
+- stage: STAGE_B
+  dependsOn: STAGE_A
+  jobs:
+  - job: JOB_B
+    condition: eq(stageDependencies.STAGE_A.JOB_A.outputs['StageAvar.sharedVar'], 'Yes') 
+    variables:
+      varFromStageA: $[ stageDependencies.STAGE_A.JOB_A.outputs['StageAvar.sharedVar'] ]
+    steps:
+    - bash: echo "Hello world  STAGE_B, JOB_B"
+    - script: "echo varFromStageA: $(varFromStageA)"
+    
+#stage C 
+- stage: STAGE_C
+  dependsOn: 
+  - STAGE_A
+  jobs:
+  - job: JOB_C
+    condition: eq(stageDependencies.STAGE_A.JOB_A.outputs['StageAvar.sharedVar'], 'Yes') 
+    variables:
+      varFromStageA: $[ stageDependencies.STAGE_A.JOB_A.outputs['StageAvar.sharedVar'] ]
+    steps:
+    - bash: "echo Hello world  STAGE_C, JOB_C"
+    - script: "echo varFromStageA: $(varFromStageA)"
+    - script: |
+        echo "This is  JOB_C in STAGE_C."
+        echo "##vso[task.setvariable variable=sharedVarStageC;isOutput=true]IdoTestFromStageC"
+      name: StageAvarStageC
+    - script: "echo StageAvarStageC.sharedVarStageC: $(StageAvarStageC.sharedVarStageC)"
+    
+    #stage D
+- stage: STAGE_D
+  dependsOn: 
+  - STAGE_A
+  - STAGE_B
+  - STAGE_C
+  jobs:
+  - job: JOB_D
+    condition: eq(stageDependencies.STAGE_A.JOB_A.outputs['StageAvar.sharedVar'], 'Yes') 
+    variables:
+      varFromStageA: $[ stageDependencies.STAGE_A.JOB_A.outputs['StageAvar.sharedVar'] ]
+      varFromStageC: $[ stageDependencies.STAGE_C.JOB_C.outputs['StageAvarStageC.sharedVarStageC'] ]
+    steps:
+    - bash: "echo Hello world  STAGE_D, JOB_D"
+    - script: "echo varFromStageA: $(varFromStageA)"
+    - script: "echo varFromStageC: $(varFromStageC)"
