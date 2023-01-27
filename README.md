@@ -1,0 +1,2 @@
+# Azure_DevOps_Share_vars_between_stages
+AZURE PIPELINE - EXAMPLE FOR SHARING VARIABLES BETWEEN STAGES
