@@ -1,5 +1,5 @@
 # Azure_DevOps_Share_vars_between_stages
 AZURE PIPELINE - EXAMPLE FOR SHARING VARIABLES BETWEEN STAGES
 ## An example azure pipeline that show how stages depends on each other include sharing variables between stages
-![screenshot](Screen Shot 2023-01-27 at 23.11.42.png)
+![Alt text](Screen Shot 2023-01-27 at 23.11.42.png?raw=true)
 
